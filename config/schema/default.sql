@@ -31,6 +31,7 @@ CREATE TABLE `metas` (
   `id` int(11) NOT NULL,
   `model` varchar(50) DEFAULT NULL,
   `foreign_id` char(36) DEFAULT NULL,
+  `domain` varchar(200) DEFAULT NULL,
   `url` varchar(255) DEFAULT NULL,
   `url_fuzzy_match` tinyint(1) NOT NULL COMMENT 'match partial urls e.g. /controller/action in the db matches /controller/action/whatever',
   `compiled_tags` text NOT NULL,
