@@ -47,6 +47,8 @@ class SeoHelper extends AppHelper {
 /**
  * Helper defaults - can be overriden when loading the helper
  *
+ * The max values are subjective/best guesses
+ *
  * @var array
  * @access protected
  */
@@ -55,6 +57,9 @@ class SeoHelper extends AppHelper {
 		'defaultTitle' => 'Default Title',
 		'defaultDescription' => 'Default Description',
 		'defaultKeywords' => 'Default Keywords',
+		'maxTitleLength' => 0, // 69 recommended
+		'maxDescriptionLength' => 0, // 160 recommended
+		'maxKeywordsLength' => 0 // 255 recommended
 	);
 
 /**
@@ -297,8 +302,8 @@ class SeoHelper extends AppHelper {
 	public function keywords($keywords = null) {
 		if ($keywords) {
 			$this->addKeywords($keywords);
-			$keywords = $this->_keywords;
 		}
+		return $this->_keywords;
 	}
 
 /**
@@ -313,7 +318,7 @@ class SeoHelper extends AppHelper {
 			$this->keywords($keywords);
 		}
 		$keywords = $this->_defaultKeywords($this->_keywords);
-		return $this->metaTag('keywords', implode($keywords, ','));
+		return $this->metaTag('keywords', $keywords);
 	}
 
 /**
@@ -471,10 +476,14 @@ class SeoHelper extends AppHelper {
  * @access protected
  */
 	protected function _defaultDescription($description = '') {
-		if ($description) {
-			return $description;
+		if (!$description) {
+			$description = $this->settings['defaultDescription'];
 		}
-		return 'default description';
+		$description = trim(preg_replace('@\s+@u', ' ', strip_tags($description)));
+		if ($this->settings['maxDescriptionLength']) {
+			return substr($description, 0, $this->settings['maxDescriptionLength']);
+		}
+		return $description;
 	}
 
 /**
@@ -485,10 +494,16 @@ class SeoHelper extends AppHelper {
  * @access protected
  */
 	protected function _defaultKeywords($keywords = '') {
-		if ($keywords) {
-			return $keywords;
+		if (!$keywords) {
+			$keywords = $this->settings['defaultKeywords'];
 		}
-		return 'default keywords';
+		if (is_array($keywords)) {
+			$keywords = implode($keywords, ',');
+		}
+		if ($this->settings['maxKeywordsLength']) {
+			return substr($keywords, 0, $this->settings['maxKeywordsLength']);
+		}
+		return $keywords;
 	}
 
 /**
@@ -499,10 +514,13 @@ class SeoHelper extends AppHelper {
  * @access protected
  */
 	protected function _defaultTitle($title = '') {
-		if ($title) {
-			return $title;
+		if (!$title) {
+			$title = $this->settings['defaultTitle'];;
 		}
-		return 'default title';
+		if ($this->settings['maxTitleLength']) {
+			return substr($title, 0, $this->settings['maxTitleLength']);
+		}
+		return $title;
 	}
 
 /**
