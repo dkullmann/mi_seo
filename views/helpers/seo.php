@@ -253,7 +253,12 @@ class SeoHelper extends AppHelper {
 
 	public function canonical($url = null) {
 		if (!$url) {
-			$url = array_merge($this->passedArgs, $this->settings['canonicalIgnore']);
+			$View = ClassRegistry::getObject('View');
+			if ($View) {
+				$url = array_merge($this->passedArgs, $this->settings['canonicalIgnore']);
+			} else {
+				$url = array();
+			}
 		}
 		$this->link('canonical', $url);
 		return ($url);
