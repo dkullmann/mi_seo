@@ -1,12 +1,55 @@
 <?php
+/**
+ * Seo Helper
+ *
+ * This helper is used to either explicitly or implicitly generate the meta tags for a page
+ *
+ * PHP version 5
+ *
+ * Copyright (c) 2010, Andy Dawson
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @filesource
+ * @copyright     Copyright (c) 2010, Andy Dawson
+ * @link          www.ad7six.com
+ * @package       mi_seo
+ * @subpackage    mi_seo.views.helpers
+ * @since         v 1.0 (03-Aug-2010)
+ * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
+ */
+/**
+ * SeoHelper class
+ *
+ * @uses          AppHelper
+ * @package       mi_seo
+ * @subpackage    mi_seo.views.helpers
+ */
 class SeoHelper extends AppHelper {
 
+/**
+ * name property
+ *
+ * @var string 'Seo'
+ * @access public
+ */
 	public $name = 'Seo';
 
-	public $helpers = array('Html');
-
+/**
+ * run time settings property
+ *
+ * @var array
+ * @access public
+ */
 	public $settings = array();
 
+/**
+ * Helper defaults - can be overriden when loading the helper
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_defaultSettings = array(
 		'autoRun' => false,
 		'defaultTitle' => 'Default Title',
@@ -14,16 +57,52 @@ class SeoHelper extends AppHelper {
 		'defaultKeywords' => 'Default Keywords',
 	);
 
+/**
+ * The meta title for the current page
+ *
+ * @var string ''
+ * @access protected
+ */
 	protected $_title = '';
 
+/**
+ * The meta description for the current page
+ *
+ * @var string ''
+ * @access protected
+ */
 	protected $_description = '';
 
+/**
+ * an array of keywords for the current page
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_keywords = array();
 
+/**
+ * An indexed stack of 'meta' links
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_linkTags = array();
 
+/**
+ * An indexed stack of meta tag data
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_metaTags = array();
 
+/**
+ * which tags can have which attrbutes
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_tagAttributes = array(
 		'content-type' => array('http-equiv'),
 		'content-style-type' => array('http-equiv'),
@@ -46,6 +125,12 @@ class SeoHelper extends AppHelper {
 		'_default_' => array('name', 'scheme'),
 	);
 
+/**
+ * attributes specific only to links
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_linkAttributes = array(
 		'charset',
 		'href',
@@ -54,9 +139,16 @@ class SeoHelper extends AppHelper {
 		'rel',
 		'rev',
 		'media',
-		'target'
+		'target',
+		'title'
 	);
 
+/**
+ * attributes any html entity can have
+ *
+ * @var array
+ * @access protected
+ */
 	protected $_commonAttributes = array(
 		'id',
 		'class',
@@ -65,9 +157,40 @@ class SeoHelper extends AppHelper {
 		'dir'
 	);
 
+/**
+ * construct method
+ *
+ * @param array $options array()
+ * @return void
+ * @access public
+ */
 	public function __construct($options = array()) {
 		$this->settings = array_merge($this->_defaultSettings, $options);
 		parent::__construct($options);
+
+		if (!empty($this->settings['title'])) {
+			$this->title($this->settings['title']);
+		}
+
+		if (!empty($this->settings['description'])) {
+			$this->description($this->settings['description']);
+		}
+
+		if (!empty($this->settings['keywords'])) {
+			$this->keywords($this->settings['description']);
+		}
+
+		if (!empty($this->settings['meta'])) {
+			foreach($this->settings['meta'] as $args) {
+				call_user_func_array(array($this, 'meta'), $args);
+			}
+		}
+
+		if (!empty($this->settings['links'])) {
+			foreach($this->settings['links'] as $args) {
+				call_user_func_array(array($this, 'link'), $args);
+			}
+		}
 	}
 
 /**
@@ -140,9 +263,34 @@ class SeoHelper extends AppHelper {
 		return $this->metaTag('description', $description);
 	}
 
-	public function headerTags() {
+/**
+ * headerTags method
+ *
+ * @return void
+ * @access public
+ */
+	public function headerTags($seperator = "\n") {
+		$return = array(
+			$this->titleTag(),
+			$this->descriptionTag(),
+			$this->keywordsTag(),
+		);
+		foreach($this->_metaTags as $name) {
+			$return[] = $this->_metaTag($name);
+		}
+		foreach($this->_linkTags as $_intermediate) {
+			$return = array_merge($return, explode('$&&$', $this->_linkTag($name, '$&&$')));
+		}
+		return implode($return, $seperator);
 	}
 
+/**
+ * keywords method
+ *
+ * @param mixed $keywords null
+ * @return void
+ * @access public
+ */
 	public function keywords($keywords = null) {
 		if ($keywords) {
 			$this->addKeywords($keywords);
@@ -162,51 +310,62 @@ class SeoHelper extends AppHelper {
 			$this->keywords($keywords);
 		}
 		$keywords = $this->_defaultKeywords($this->_keywords);
-		return $this->metaTag('keywords', implode($keywords, ', '));
+		return $this->metaTag('keywords', implode($keywords, ','));
 	}
 
-	public function link($name = 'alternate', $content = '', $attributes = array()) {
-		if (empty($content) && empty($attributes) && !empty($this->_linkTags[$name])) {
-			return $this->_linkTags[$name];
+/**
+ * link method
+ *
+ * @param string $rel 'alternate'
+ * @param string $href ''
+ * @param array $attributes array()
+ * @return void
+ * @access public
+ */
+	public function link($rel = 'alternate', $href = '', $attributes = array()) {
+		if (empty($href) && empty($attributes) && !empty($this->_linkTags[$rel])) {
+			return $this->_linkTags[$rel];
 		}
 
-		if (!empty($this->_tagAttributes[$name])) {
-			$allowedAttrs = $this->_tagAttributes[$name];
+		if (!empty($this->_tagAttributes[$rel])) {
+			$allowedAttrs = $this->_tagAttributes[$rel];
 		} else {
 			$allowedAttrs = $this->_tagAttributes['_default_'];
 		}
 
 		$allowedAttrs = array_merge($allowedAttrs, $this->_commonAttributes, $this->_linkAttributes);
 		$attributes = array_intersect_key($attributes, array_flip($allowedAttrs));
+		$attributes['rel'] = $rel;
+		$attributes['href'] = $href;
 
 		if ($attributes) {
 			$unique = crc32(serialize($attributes));
 		} else {
 			$unique = '';
 		}
-		return $this->_linkTags[$name][$content . $unique] = $attributes;
+		return $this->_linkTags[$rel][$href . $unique] = $attributes;
 	}
 
 /**
  * linkTag method
  *
- * @param string $name 'alternate'
- * @param string $content ''
+ * @param string $rel 'alternate'
+ * @param string $href ''
  * @param array $attributes array()
  * @return void
  * @access public
  */
-	public function linkTag($name = 'alternate', $content = '', $attributes = array()) {
-		$attributes = $this->meta($name, $content, $attributes);
+	public function linkTag($rel = 'alternate', $href = '', $attributes = array(), $_seperator = "\n") {
+		$attributes = $this->link($rel, $href, $attributes);
 		$test = current($attributes);
 		if (is_array($test)) {
 			$return = '';
 			foreach($attributes as $link) {
-				$return .= $this->Html->tag('link', null, $link);
+				$return .= sprintf('<link%s />', $this->_parseAttributes($link)) . $_seperator;
 			}
 			return $return;
 		}
-		return $this->Html->tag('link', null, $attributes);
+		return sprintf('<link%s />', $this->_parseAttributes($attributes));
 	}
 
 /**
@@ -249,7 +408,7 @@ class SeoHelper extends AppHelper {
  */
 	public function metaTag($name = 'title', $content = '', $attributes = array()) {
 		$attributes = $this->meta($name, $content, $attributes);
-		return $this->Html->tag('meta', null, $attributes);
+		return sprintf('<meta%s />', $this->_parseAttributes($attributes));
 	}
 
 /**
@@ -263,6 +422,13 @@ class SeoHelper extends AppHelper {
 		unset ($this->_keywords[$keyword]);
 	}
 
+/**
+ * reset to uninitialized state
+ *
+ * @param array $settings array()
+ * @return void
+ * @access public
+ */
 	public function reset($settings = array()) {
 		$this->settings = array_merge($this->_defaultSettings, $settings);
 		$this->_title = $this->_description = '';

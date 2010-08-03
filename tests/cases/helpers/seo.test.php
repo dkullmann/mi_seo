@@ -1,11 +1,10 @@
 <?php
-App::import('Helper', array('Html', 'MiSeo.Seo'));
+App::import('Helper', 'MiSeo.Seo');
 
 class SeoHelperTestCase extends CakeTestCase {
 
 	function startTest() {
 		$this->Seo = new SeoHelper();
-		$this->Seo->Html = new HtmlHelper();
 	}
 
 	function testTitleExplicit() {
@@ -26,9 +25,7 @@ class SeoHelperTestCase extends CakeTestCase {
 				'content' => 'Page Title'
 			)
 		);
-		$result = $this->Seo->title('Page Title');
-		$this->assertFalse($result);
-
+		$this->Seo->title('Page Title');
 		$result = $this->Seo->titleTag();
 		$this->assertTags($result, $expected);
 	}
@@ -51,9 +48,7 @@ class SeoHelperTestCase extends CakeTestCase {
 				'content' => 'Page Description'
 			)
 		);
-		$result = $this->Seo->description('Page Description');
-		$this->assertFalse($result);
-
+		$this->Seo->description('Page Description');
 		$result = $this->Seo->descriptionTag();
 		$this->assertTags($result, $expected);
 	}
@@ -62,7 +57,7 @@ class SeoHelperTestCase extends CakeTestCase {
 		$expected = array(
 			'meta' => array(
 				'name' => 'keywords',
-				'content' => 'keyword1, keyword2, key phrase 1, key phrase 2'
+				'content' => 'keyword1,keyword2,key phrase 1,key phrase 2'
 			)
 		);
 		$result = $this->Seo->keywordsTag(array('keyword1', 'keyword2', 'key phrase 1', 'key phrase 2'));
@@ -73,13 +68,59 @@ class SeoHelperTestCase extends CakeTestCase {
 		$expected = array(
 			'meta' => array(
 				'name' => 'keywords',
-				'content' => 'keyword1, keyword2, key phrase 1, key phrase 2'
+				'content' => 'keyword1,keyword2,key phrase 1,key phrase 2'
 			)
 		);
-		$result = $this->Seo->keywords(array('keyword1', 'keyword2', 'key phrase 1', 'key phrase 2'));
-		$this->assertFalse($result);
-
+		$this->Seo->keywords(array('keyword1', 'keyword2', 'key phrase 1', 'key phrase 2'));
 		$result = $this->Seo->keywordsTag();
+		$this->assertTags($result, $expected);
+	}
+
+	function testLinkExplicit() {
+		$expected = array(
+			'link' => array(
+				'href' => '/someurl',
+				'rel' => 'alternate'
+			)
+		);
+		$result = $this->Seo->linkTag('alternate', '/someurl');
+		$this->assertTags($result, $expected);
+	}
+
+	function testLinkImplicit() {
+		$expected = array(
+			'link' => array(
+				'href' => '/someurl',
+				'rel' => 'alternate'
+			)
+		);
+		$this->Seo->link('alternate', '/someurl');
+		$result = $this->Seo->linkTag('alternate');
+		$this->assertTags($result, $expected);
+	}
+
+	function testMultipleLinks() {
+		$expected = array(
+			'link' => array(
+				'title' => 'English',
+				'type' => 'text/html',
+				'hreflang' => 'en',
+				'rel' => 'alternate',
+				'href' => '/someurl'
+			),
+			array(
+				'link' => array(
+					'title' => 'Deutsch',
+					'type' => 'text/html',
+					'hreflang' => 'de',
+					'rel' => 'alternate',
+					'href' => '/someotherurl'
+				)
+			)
+		);
+		$this->Seo->link('alternate', '/someurl', array('title' => 'English', 'type' =>'text/html', 'hreflang' => 'en'));
+		$this->Seo->link('alternate', '/someotherurl', array('title' => 'Deutsch', 'type' =>'text/html', 'hreflang' => 'de'));
+		$result = $this->Seo->linkTag('alternate');
 		$this->assertTags($result, $expected);
 	}
 
