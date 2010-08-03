@@ -255,7 +255,7 @@ class SeoHelper extends AppHelper {
 		if (!$url) {
 			$View = ClassRegistry::getObject('View');
 			if ($View) {
-				$url = array_merge($this->passedArgs, $this->settings['canonicalIgnore']);
+				$url = array_merge($View->passedArgs, $this->settings['canonicalIgnore']);
 			} else {
 				$url = array();
 			}
