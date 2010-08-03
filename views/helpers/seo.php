@@ -269,6 +269,32 @@ class SeoHelper extends AppHelper {
 	}
 
 /**
+ * has <whatever> already been set?
+ *
+ * @param string $what 'title'
+ * @return void
+ * @access public
+ */
+	public function has($what = 'title') {
+		switch($what) {
+			case 'title':
+				return !empty($this->_title);
+			case 'description':
+				return !empty($this->_description);
+			case 'keywords':
+				return !empty($this->_keywords);
+			default:
+				if (!empty($this->_metaTags[$what])) {
+					return true;
+				}
+				if (!empty($this->_linkTags[$what])) {
+					return true;
+				}
+		}
+		return false;
+	}
+
+/**
  * headerTags method
  *
  * Generaet all tags to put in the header - ensure tehe title, description and keywords are first
@@ -379,13 +405,13 @@ class SeoHelper extends AppHelper {
 /**
  * meta method
  *
- * @param string $name 'title'
+ * @param string $name 'description'
  * @param string $content ''
  * @param array $attributes array()
  * @return void
  * @access public
  */
-	public function meta($name = 'title', $content = '', $attributes = array()) {
+	public function meta($name = 'description', $content = '', $attributes = array()) {
 		if (empty($content) && !empty($this->_metaTags[$name])) {
 			return current($this->_metaTags[$name]);
 		}
