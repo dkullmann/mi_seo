@@ -266,6 +266,8 @@ class SeoHelper extends AppHelper {
 /**
  * headerTags method
  *
+ * Generaet all tags to put in the header - ensure tehe title, description and keywords are first
+ *
  * @return void
  * @access public
  */
@@ -275,11 +277,12 @@ class SeoHelper extends AppHelper {
 			$this->descriptionTag(),
 			$this->keywordsTag(),
 		);
-		foreach($this->_metaTags as $name) {
-			$return[] = $this->_metaTag($name);
+		$otherMetaTags = array_diff(array_keys($this->_metaTags), array('title', 'description', 'keywords'));
+		foreach($otherMetaTags as $name) {
+			$return[] = $this->metaTag($name);
 		}
-		foreach($this->_linkTags as $_intermediate) {
-			$return = array_merge($return, explode('$&&$', $this->_linkTag($name, '$&&$')));
+		foreach(array_keys($this->_linkTags) as $name) {
+			$return[] = $this->linkTag($name);
 		}
 		return implode($return, $seperator);
 	}

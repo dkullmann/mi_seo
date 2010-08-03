@@ -124,6 +124,98 @@ class SeoHelperTestCase extends CakeTestCase {
 		$this->assertTags($result, $expected);
 	}
 
+	function testheaderTagsSimple() {
+		$expected = array(
+			'meta' => array(
+				'name' => 'title',
+				'content' => 'Enticing page title'
+			),
+			array(
+				'meta' => array(
+					'name' => 'description',
+					'content' => 'Enticing page description'
+				)
+			),
+			array(
+				'meta' => array(
+					'name' => 'keywords',
+					'content' => 'fluffy,bunny,cute'
+				)
+			)
+		);
+
+		$this->Seo->title('Enticing page title');
+		$this->Seo->description('Enticing page description');
+		$this->Seo->keywords('fluffy,bunny,cute');
+
+		$result = $this->Seo->headerTags();
+	}
+
+/**
+ * Test calling the headerTags funcion + removing/replacing tags
+ *
+ * @return void
+ * @access public
+ */
+	function testheaderTags() {
+		$expected = array(
+			'meta' => array(
+				'name' => 'title',
+				'content' => 'Enticing page title'
+			),
+			array(
+				'meta' => array(
+					'name' => 'description',
+					'content' => 'Enticing page description'
+				)
+			),
+			array(
+				'meta' => array(
+					'name' => 'keywords',
+					'content' => 'bunny,rabid,fugly'
+				)
+			),
+			array(
+				'meta' => array(
+					'name' => 'author',
+					'content' => 'Andy Dawson'
+				)
+			),
+			'link' => array(
+				'title' => 'English',
+				'type' => 'text/html',
+				'hreflang' => 'en',
+				'rel' => 'alternate',
+				'href' => '/someurl'
+			),
+			array(
+				'link' => array(
+					'title' => 'Deutsch',
+					'type' => 'text/html',
+					'hreflang' => 'de',
+					'rel' => 'alternate',
+					'href' => '/someotherurl'
+				)
+			)
+		);
+
+		$this->Seo->title('Enticing page title');
+		$this->Seo->description('Enticing page description');
+		$this->Seo->keywords('fluffy,bunny,cute');
+
+		$this->Seo->removeKeyword('fluffy');
+		$this->Seo->removeKeyword('cute');
+		$this->Seo->addKeyword('rabid');
+		$this->Seo->addKeyword('fugly');
+
+		$this->Seo->meta('author', 'Andy Dawson');
+		$this->Seo->link('alternate', '/someurl', array('title' => 'English', 'type' =>'text/html', 'hreflang' => 'en'));
+		$this->Seo->link('alternate', '/someotherurl', array('title' => 'Deutsch', 'type' =>'text/html', 'hreflang' => 'de'));
+
+		$result = $this->Seo->headerTags();
+		$this->assertTags($result, $expected);
+	}
+
 	function endTest() {
 		unset($this->Seo);
 		ClassRegistry::flush();
