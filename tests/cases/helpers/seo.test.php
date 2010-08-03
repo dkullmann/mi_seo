@@ -5,6 +5,7 @@ class SeoHelperTestCase extends CakeTestCase {
 
 	function startTest() {
 		$this->Seo = new SeoHelper();
+		$this->Seo->passedArgs = array();
 	}
 
 	function testTitleExplicit() {

@@ -54,6 +54,16 @@ class SeoHelper extends AppHelper {
  */
 	protected $_defaultSettings = array(
 		'autoRun' => false,
+		'autoCanonical' => true,
+		'canonicalIgnore' => array(
+			'fields' => false,
+			'order' => false,
+			'limit' => false,
+			'recursive' => false,
+			'sort' => false,
+			'direction' => false,
+			'step' => false,
+		),
 		'defaultTitle' => 'Default Title',
 		'defaultDescription' => 'Default Description',
 		'defaultKeywords' => 'Default Keywords',
@@ -241,6 +251,19 @@ class SeoHelper extends AppHelper {
 		}
 	}
 
+	public function canonical($url = null) {
+		if (!$url) {
+			$url = array_merge($this->passedArgs, $this->settings['canonicalIgnore']);
+		}
+		$this->link('canonical', $url);
+		return ($url);
+	}
+
+	public function canonicalTag($url = null) {
+		$url = $this->canonical($url);
+		return $this->linkTag('canonical', $url);
+	}
+
 /**
  * description method
  *
@@ -308,6 +331,9 @@ class SeoHelper extends AppHelper {
 			$this->descriptionTag(),
 			$this->keywordsTag(),
 		);
+		if ($this->settings['autoCanonical'] && !$this->has('canonical')) {
+			$this->canonical();
+		}
 		$otherMetaTags = array_diff(array_keys($this->_metaTags), array('title', 'description', 'keywords'));
 		foreach($otherMetaTags as $name) {
 			$return[] = $this->metaTag($name);
@@ -370,7 +396,7 @@ class SeoHelper extends AppHelper {
 		$allowedAttrs = array_merge($allowedAttrs, $this->_commonAttributes, $this->_linkAttributes);
 		$attributes = array_intersect_key($attributes, array_flip($allowedAttrs));
 		$attributes['rel'] = $rel;
-		$attributes['href'] = $href;
+		$attributes['href'] = parent::url($href);
 
 		if ($attributes) {
 			$unique = crc32(serialize($attributes));
