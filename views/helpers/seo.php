@@ -465,7 +465,7 @@ class SeoHelper extends AppHelper {
 		if (!$title) {
 			$title = $this->_defaultDescription($this->_title);
 		}
-		return $this->metaTag('title', $title);
+		return sprintf('<title>%s</title>', htmlspecialchars($title));
 	}
 
 /**

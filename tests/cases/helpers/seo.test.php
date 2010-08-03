@@ -9,10 +9,7 @@ class SeoHelperTestCase extends CakeTestCase {
 
 	function testTitleExplicit() {
 		$expected = array(
-			'meta' => array(
-				'name' => 'title',
-				'content' => 'Page Title'
-			)
+			'<title', 'Page Title', '/title'
 		);
 		$result = $this->Seo->titleTag('Page Title');
 		$this->assertTags($result, $expected);
@@ -20,10 +17,7 @@ class SeoHelperTestCase extends CakeTestCase {
 
 	function testTitleImplicit() {
 		$expected = array(
-			'meta' => array(
-				'name' => 'title',
-				'content' => 'Page Title'
-			)
+			'<title', 'Page Title', '/title'
 		);
 		$this->Seo->title('Page Title');
 		$result = $this->Seo->titleTag();
@@ -126,10 +120,6 @@ class SeoHelperTestCase extends CakeTestCase {
 
 	function testheaderTagsSimple() {
 		$expected = array(
-			'meta' => array(
-				'name' => 'title',
-				'content' => 'Enticing page title'
-			),
 			array(
 				'meta' => array(
 					'name' => 'description',
@@ -159,10 +149,7 @@ class SeoHelperTestCase extends CakeTestCase {
  */
 	function testheaderTags() {
 		$expected = array(
-			'meta' => array(
-				'name' => 'title',
-				'content' => 'Enticing page title'
-			),
+			'<title', 'Enticing page title', '/title',
 			array(
 				'meta' => array(
 					'name' => 'description',
