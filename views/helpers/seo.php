@@ -508,6 +508,9 @@ class SeoHelper extends AppHelper {
  * @access public
  */
 	public function title($title = null) {
+		if ($title === null) {
+			return $this->_title;
+		}
 		$this->_title = $title;
 	}
 
