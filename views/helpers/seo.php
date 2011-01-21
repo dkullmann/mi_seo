@@ -277,7 +277,7 @@ class SeoHelper extends AppHelper {
 			if ($View) {
 				$url = Router::parse($View->here);
 				$route = Router::requestRoute();
-				if ($route->options['pass']) {
+				if (!empty($route->options['pass'])) {
 					$url['pass'] = array_diff_key($url['pass'], $route->options['pass']);
 				}
 				$url = array_diff_key(array_merge($url, $url['pass'], $url['named']), $this->settings['canonicalIgnore']);
