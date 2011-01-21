@@ -56,6 +56,7 @@ class SeoHelper extends AppHelper {
 		'autoRun' => false,
 		'autoCanonical' => true,
 		'canonicalIgnore' => array(
+			'page' => false,
 			'fields' => false,
 			'order' => false,
 			'limit' => false,
@@ -251,15 +252,38 @@ class SeoHelper extends AppHelper {
 		}
 	}
 
+/**
+ * canonical method
+ *
+ * Returns a canonical url for the current page.
+ *
+ * It ignore paging and default sort arguments and sets the canonical to the main results page
+ *
+ * In addition, if there isn't already a robots meta tag - it sets noindex, follow for these
+ * results pages. This achieves that page > 1 results are crawled, the links found on those pages
+ * indexed, but no google result for the actual page 2+ index page
+ *
+ * @param mixed $url null
+ * @return void
+ * @access public
+ */
 	public function canonical($url = null) {
 		if (!$url) {
 			$View = ClassRegistry::getObject('View');
 			if ($View) {
-				$url = array_merge($View->passedArgs, $this->settings['canonicalIgnore']);
+				$url = array_diff_key($View->passedArgs, $this->settings['canonicalIgnore']);
 			} else {
 				$url = array();
 			}
 		}
+
+		if (!$this->has('robots') && (
+				(!empty($View->passedArgs['page']) && $View->passedArgs['page'] > 1)
+				|| 	!empty($View->passedArgs['order'])
+			)) {
+			$this->meta('robots', 'noindex, follow');
+		}
+
 		$this->link('canonical', $url);
 		return ($url);
 	}
