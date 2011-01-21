@@ -56,6 +56,9 @@ class SeoHelper extends AppHelper {
 		'autoRun' => false,
 		'autoCanonical' => true,
 		'canonicalIgnore' => array(
+			'pass' => false,
+			'named' => false,
+			'url' => false,
 			'page' => false,
 			'fields' => false,
 			'order' => false,
@@ -271,21 +274,26 @@ class SeoHelper extends AppHelper {
 		if (!$url) {
 			$View = ClassRegistry::getObject('View');
 			if ($View) {
-				$url = array_diff_key($View->passedArgs, $this->settings['canonicalIgnore']);
+				$url = Router::parse($View->here);
+				$route = Router::requestRoute();
+				if ($route->options['pass']) {
+					$url['pass'] = array_diff_key($url['pass'], $route->options['pass']);
+				}
+				$url = array_diff_key(array_merge($url, $url['pass'], $url['named']), $this->settings['canonicalIgnore']);
 			} else {
 				$url = array();
 			}
 		}
 
 		if (!$this->has('robots') && (
-				(!empty($View->passedArgs['page']) && $View->passedArgs['page'] > 1)
-				|| 	!empty($View->passedArgs['order'])
+				(!empty($view->passedArgs['page']) && $view->passedArgs['page'] > 1)
+				|| !empty($view->passedArgs['order'])
 			)) {
 			$this->meta('robots', 'noindex, follow');
 		}
 
 		$this->link('canonical', $url);
-		return ($url);
+		return $url;
 	}
 
 	public function canonicalTag($url = null) {
@@ -349,7 +357,7 @@ class SeoHelper extends AppHelper {
 /**
  * headerTags method
  *
- * Generaet all tags to put in the header - ensure tehe title, description and keywords are first
+ * Generate all tags to put in the header - ensure tehe title, description and keywords are first
  *
  * @return void
  * @access public
