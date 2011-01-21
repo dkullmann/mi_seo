@@ -19,6 +19,7 @@
  * @since         v 1.0 (03-Aug-2010)
  * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
  */
+
 /**
  * SeoHelper class
  *
@@ -286,16 +287,23 @@ class SeoHelper extends AppHelper {
 		}
 
 		if (!$this->has('robots') && (
-				(!empty($view->passedArgs['page']) && $view->passedArgs['page'] > 1)
-				|| !empty($view->passedArgs['order'])
+				(!empty($View->params['page']) && $View->params['page'] > 1)
+				|| !empty($View->params['order'])
 			)) {
 			$this->meta('robots', 'noindex, follow');
 		}
-
 		$this->link('canonical', $url);
+
 		return $url;
 	}
 
+/**
+ * canonicalTag method
+ *
+ * @param mixed $url null
+ * @return void
+ * @access public
+ */
 	public function canonicalTag($url = null) {
 		$url = $this->canonical($url);
 		return $this->linkTag('canonical', $url);
